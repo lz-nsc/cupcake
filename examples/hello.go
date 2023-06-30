@@ -9,8 +9,8 @@ import (
 
 func main() {
 	cc := cupcake.New()
-	cc.GET("/cupcake", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "Welcome to cupcake!")
+	cc.GET("/cupcake", func(resp *cupcake.Response, req *cupcake.Request) {
+		resp.String(http.StatusOK, "Welcome to cupcake!")
 	})
 	fmt.Println("Start cupcake server")
 	cc.Run(":8080")
