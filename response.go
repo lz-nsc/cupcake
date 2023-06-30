@@ -43,11 +43,11 @@ func (resp *Response) String(code int, format string, values ...interface{}) {
 	).write([]byte(fmt.Sprintf(format, values...)))
 }
 
-func (resp *Response) Json(code int, obj interface{}) {
+func (resp *Response) JSON(code int, obj interface{}) {
 	resp.SetHeader("Content-Type", "application/json").Status(code)
 	encoder := json.NewEncoder(resp.writer)
 	if err := encoder.Encode(obj); err != nil {
-		resp.Error(http.StatusInternalServerError, err.Error())
+		panic(err)
 	}
 }
 
