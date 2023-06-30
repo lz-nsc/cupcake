@@ -1,22 +1,19 @@
 package cupcake
 
 import (
-	"fmt"
 	"net/http"
 )
 
 // cupcake request handler
 type HandlerFunc func(*Response, *Request)
 
-type handlers map[string]HandlerFunc
-
 type Cupcake struct {
-	router map[string]handlers
+	router *router
 }
 
 // Construct a new cupcake server
 func New() *Cupcake {
-	return &Cupcake{router: make(map[string]handlers)}
+	return &Cupcake{router: newRouter()}
 }
 
 // Run a cupcake server
@@ -33,45 +30,23 @@ func (cc *Cupcake) Run(params ...string) {
 }
 
 func (cc *Cupcake) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	request := NewRequest(r)
-	response := NewResponse(w)
-
-	if handlers, ok := cc.router[request.Path()]; ok {
-		if handler, ok := handlers[request.Method()]; ok {
-			fmt.Println(request.String())
-
-			handler(response, request)
-		} else {
-			fmt.Printf("%s : 405 Method Not Allowed\n", request.String())
-			response.Error(http.StatusMethodNotAllowed, "405 Method Not Allowed")
-		}
-	} else {
-		fmt.Printf("%s : 404 NOT FOUND\n", request.String())
-		response.Error(http.StatusNotFound, fmt.Sprintf("404 NOT FOUND: %s\n", request.Path()))
-	}
+	cc.router.handle(NewResponse(w), NewRequest(r))
 }
 
 func (cc *Cupcake) run(address string) {
 	http.ListenAndServe(address, cc)
 }
 
-func (cc *Cupcake) addRouter(method string, pattern string, handler HandlerFunc) {
-	if cc.router[pattern] == nil {
-		cc.router[pattern] = handlers{}
-	}
-	cc.router[pattern][method] = handler
-}
-
 func (cc *Cupcake) GET(pattern string, handler HandlerFunc) {
-	cc.addRouter(http.MethodGet, pattern, handler)
+	cc.router.addRouter(http.MethodGet, pattern, handler)
 }
 
 func (cc *Cupcake) POST(pattern string, handler HandlerFunc) {
-	cc.addRouter(http.MethodPost, pattern, handler)
+	cc.router.addRouter(http.MethodPost, pattern, handler)
 }
 func (cc *Cupcake) PUT(pattern string, handler HandlerFunc) {
-	cc.addRouter(http.MethodPut, pattern, handler)
+	cc.router.addRouter(http.MethodPut, pattern, handler)
 }
 func (cc *Cupcake) DELETE(pattern string, handler HandlerFunc) {
-	cc.addRouter(http.MethodDelete, pattern, handler)
+	cc.router.addRouter(http.MethodDelete, pattern, handler)
 }
