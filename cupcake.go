@@ -6,7 +6,7 @@ import (
 )
 
 // cupcake request handler
-type HandlerFunc func(http.ResponseWriter, *http.Request)
+type HandlerFunc func(*Response, *Request)
 
 type handlers map[string]HandlerFunc
 
@@ -33,19 +33,21 @@ func (cc *Cupcake) Run(params ...string) {
 }
 
 func (cc *Cupcake) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	pattern := r.URL.Path
-	method := r.Method
+	request := NewRequest(r)
+	response := NewResponse(w)
 
-	if handlers, ok := cc.router[pattern]; ok {
-		if handler, ok := handlers[method]; ok {
-			handler(w, r)
+	if handlers, ok := cc.router[request.Path()]; ok {
+		if handler, ok := handlers[request.Method()]; ok {
+			fmt.Println(request.String())
+
+			handler(response, request)
 		} else {
-			w.WriteHeader(http.StatusMethodNotAllowed)
-			fmt.Fprintln(w, "405 Method Not Allowed")
+			fmt.Printf("%s : 405 Method Not Allowed\n", request.String())
+			response.Error(http.StatusMethodNotAllowed, "405 Method Not Allowed")
 		}
 	} else {
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(w, "404 NOT FOUND: %s\n", r.URL)
+		fmt.Printf("%s : 404 NOT FOUND\n", request.String())
+		response.Error(http.StatusNotFound, fmt.Sprintf("404 NOT FOUND: %s\n", request.Path()))
 	}
 }
 
