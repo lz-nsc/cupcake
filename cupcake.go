@@ -38,15 +38,15 @@ func (cc *Cupcake) run(address string) {
 }
 
 func (cc *Cupcake) GET(pattern string, handler HandlerFunc) {
-	cc.router.addRouter(http.MethodGet, pattern, handler)
+	cc.router.addRouter(GET, pattern, handler)
 }
 
 func (cc *Cupcake) POST(pattern string, handler HandlerFunc) {
-	cc.router.addRouter(http.MethodPost, pattern, handler)
+	cc.router.addRouter(POST, pattern, handler)
 }
 func (cc *Cupcake) PUT(pattern string, handler HandlerFunc) {
-	cc.router.addRouter(http.MethodPut, pattern, handler)
+	cc.router.addRouter(PUT, pattern, handler)
 }
 func (cc *Cupcake) DELETE(pattern string, handler HandlerFunc) {
-	cc.router.addRouter(http.MethodDelete, pattern, handler)
+	cc.router.addRouter(DELETE, pattern, handler)
 }
