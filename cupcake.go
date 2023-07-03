@@ -36,7 +36,7 @@ func (cc *Cupcake) Run(params ...string) {
 }
 
 func (cc *Cupcake) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	cc.router.handle(NewResponse(w), NewRequest(r))
+	cc.handle(NewResponse(w), NewRequest(r))
 }
 
 func (cc *Cupcake) run(address string) {
