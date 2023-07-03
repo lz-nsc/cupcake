@@ -8,12 +8,18 @@ import (
 type HandlerFunc func(*Response, *Request)
 
 type Cupcake struct {
+	*RouteGroup
 	router *router
+	groups []*RouteGroup
 }
 
 // Construct a new cupcake server
 func New() *Cupcake {
-	return &Cupcake{router: newRouter()}
+	engine := &Cupcake{router: newRouter()}
+	// Make the engine itself a group with empty prefix
+	engine.RouteGroup = NewGroup("", engine)
+	engine.groups = []*RouteGroup{engine.RouteGroup}
+	return engine
 }
 
 // Run a cupcake server
@@ -35,18 +41,4 @@ func (cc *Cupcake) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (cc *Cupcake) run(address string) {
 	http.ListenAndServe(address, cc)
-}
-
-func (cc *Cupcake) GET(pattern string, handler HandlerFunc) {
-	cc.router.addRouter(GET, pattern, handler)
-}
-
-func (cc *Cupcake) POST(pattern string, handler HandlerFunc) {
-	cc.router.addRouter(POST, pattern, handler)
-}
-func (cc *Cupcake) PUT(pattern string, handler HandlerFunc) {
-	cc.router.addRouter(PUT, pattern, handler)
-}
-func (cc *Cupcake) DELETE(pattern string, handler HandlerFunc) {
-	cc.router.addRouter(DELETE, pattern, handler)
 }

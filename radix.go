@@ -112,12 +112,10 @@ func (node *radixNode) InsertNode(path string, method methodType, handler Handle
 		child.endpoints = next.endpoints
 
 		// add new childNode to parent node
-		next.children = make([]radixNodes, 0)
+		next.children = make([]radixNodes, 4)
 		next.children[child.nodeType] = []*radixNode{child}
 
-		temp, nextStart := curNode.addNode(search)
-		curNode = temp
-		search = search[nextStart:]
+		curNode = next
 	}
 }
 
