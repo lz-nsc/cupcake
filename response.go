@@ -87,3 +87,7 @@ func (resp *Response) write(content []byte) {
 func (resp *Response) Error(errCode int, errMsg string) {
 	http.Error(resp.writer, errMsg, errCode)
 }
+
+func (resp *Response) StatusCode() int {
+	return resp.statusCode
+}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/lz-nsc/cupcake"
 	"github.com/lz-nsc/cupcake/middlewares"
@@ -10,9 +9,11 @@ import (
 
 func main() {
 	cc := cupcake.New()
-	cc.MiddlerWare(middlewares.Logger)
+
+	cc.MiddlerWare(middlewares.Recovery)
+
 	cc.GET("/cupcake", func(resp *cupcake.Response, req *cupcake.Request) {
-		resp.String(http.StatusOK, "Welcome to cupcake!")
+		panic("For no reason. LOL")
 	})
 
 	fmt.Println("Start cupcake server")
