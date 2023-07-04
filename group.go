@@ -3,6 +3,7 @@ package cupcake
 import (
 	"fmt"
 	"net/http"
+	"path"
 )
 
 type RouteGroup struct {
@@ -36,6 +37,32 @@ func (group *RouteGroup) Group(prefix string) *RouteGroup {
 
 func (group *RouteGroup) MiddlerWare(m MiddlerWare) {
 	group.middlewares = append(group.middlewares, m)
+}
+
+func (group *RouteGroup) Static(pattern string, folder string) {
+	handler := group.staticHandler(pattern, http.Dir(folder))
+
+	pattern = path.Join(pattern, "/*")
+
+	group.GET(pattern, handler)
+}
+
+func (group *RouteGroup) staticHandler(path string, fs http.FileSystem) HandlerFunc {
+	if path[0] != '/' {
+		path = "/" + path
+	}
+	pattern := group.prefix + path
+	fileServer := http.StripPrefix(pattern, http.FileServer(fs))
+	return func(resp *Response, req *Request) {
+		file := req.Wild()
+		// Check if file exists and/or if we have permission to access it
+		if _, err := fs.Open(file); err != nil {
+			resp.Status(http.StatusNotFound)
+			return
+		}
+
+		fileServer.ServeHTTP(resp.writer, req.req)
+	}
 }
 
 func (group *RouteGroup) addRouter(method methodType, path string, handler HandlerFunc) {
