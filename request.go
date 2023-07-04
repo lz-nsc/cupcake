@@ -10,6 +10,7 @@ type Request struct {
 	path   string
 	method string
 	params map[string]string
+	wild   string
 }
 
 func NewRequest(r *http.Request) *Request {
@@ -39,9 +40,16 @@ func (r Request) Path() string {
 func (r Request) Method() string {
 	return r.method
 }
-func (r *Request) SetParam(params map[string]string) {
+func (r *Request) SetParams(params map[string]string) {
 	r.params = params
+}
+func (r *Request) SetWild(wild string) {
+	r.wild = wild
 }
 func (r Request) Param(key string) string {
 	return r.params[key]
+}
+
+func (r Request) Wild() string {
+	return r.wild
 }

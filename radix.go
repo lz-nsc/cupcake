@@ -75,7 +75,7 @@ func (node *radixNode) InsertNode(path string, method methodType, handler Handle
 			return
 		}
 		pType, pattern, _, _, _, _, _ := parsePath(search)
-		next := node.findNext(pType, search)
+		next := curNode.findNext(pType, search)
 
 		if (pType == ParamNode || pType == RegrexNode) && pattern != "" {
 			paramKeys = append(paramKeys, pattern)
@@ -119,9 +119,9 @@ func (node *radixNode) InsertNode(path string, method methodType, handler Handle
 	}
 }
 
-func (node *radixNode) Route(path string, method methodType) (handler HandlerFunc, params map[string]string, err error) {
+func (node *radixNode) Route(path string, method methodType) (handler HandlerFunc, params map[string]string, wild string, err error) {
 	params = map[string]string{}
-	child, paramVals, routeErr := node.route(path, method)
+	child, paramVals, wildStr, routeErr := node.route(path, method)
 	if routeErr != nil {
 		err = routeErr
 		return
@@ -129,26 +129,27 @@ func (node *radixNode) Route(path string, method methodType) (handler HandlerFun
 
 	endpoint := child.endpoints[method]
 	if len(endpoint.paramKeys) != len(paramVals) {
-		panic("ParamKeys and ParamVals donot match")
+		panic("ParamKeys and ParamVals do not match")
 	}
 	for idx := 0; idx < len(endpoint.paramKeys); idx++ {
 		params[endpoint.paramKeys[idx]] = paramVals[idx]
 	}
 	handler = endpoint.handler
+	wild = wildStr
+
 	return
 }
 
-func (node *radixNode) route(path string, method methodType) (child *radixNode, paramVals []string, err error) {
+func (node *radixNode) route(path string, method methodType) (child *radixNode, paramVals []string, wild string, err error) {
 	curNode := node
 	search := path
-
 	for t, nodeGroup := range curNode.children {
 		var tempCurrent *radixNode
 		tempSearch := search
 		nType := nodeType(t)
 		switch nType {
 		case StaticNode:
-			next := node.findNext(StaticNode, path)
+			next := curNode.findNext(StaticNode, path)
 			if next == nil || !strings.HasPrefix(path, next.prefix) {
 				continue
 			}
@@ -196,10 +197,11 @@ func (node *radixNode) route(path string, method methodType) (child *radixNode, 
 				}
 
 				// Keep searching
-				res, vals, newErr := tempCurrent.route(tempSearch, method)
+				res, vals, wildStr, newErr := tempCurrent.route(tempSearch, method)
 				if res != nil {
 					child = res
 					paramVals = append(paramVals, vals...)
+					wild = wildStr
 					err = nil
 					return
 				}
@@ -213,6 +215,7 @@ func (node *radixNode) route(path string, method methodType) (child *radixNode, 
 		default:
 			if len(nodeGroup) > 0 {
 				tempCurrent = nodeGroup[0]
+				wild = tempSearch
 				tempSearch = ""
 			}
 		}
@@ -231,11 +234,12 @@ func (node *radixNode) route(path string, method methodType) (child *radixNode, 
 			continue
 		}
 
-		res, vals, newErr := tempCurrent.route(tempSearch, method)
+		res, vals, wildStr, newErr := tempCurrent.route(tempSearch, method)
 		// Found node
 		if res != nil {
 			child = res
 			paramVals = append(paramVals, vals...)
+			wild = wildStr
 			err = nil
 			return
 		}
@@ -253,7 +257,6 @@ func (node *radixNode) route(path string, method methodType) (child *radixNode, 
 
 func (node *radixNode) addNode(path string) (*radixNode, int) {
 	pType, pattern, regex, tail, _, _, nextStart := parsePath(path)
-
 	child := NewNode(pattern)
 	child.tail = tail
 	child.nodeType = pType
@@ -353,6 +356,7 @@ func parsePath(path string) (
 	if wildIdx > 0 {
 		// Segment the static part
 		end = wildIdx
+		nextStart = wildIdx
 		pattern = pattern[start:end]
 		return
 	}
