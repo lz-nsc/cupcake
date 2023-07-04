@@ -296,7 +296,7 @@ func parsePath(path string) (
 		return
 	}
 
-	if wildIdx >= 0 && wildIdx < len(pattern)-1 {
+	if paramIdx < 0 && wildIdx >= 0 && wildIdx < len(pattern)-1 {
 		panic("Wildcard '*' must be at the end of the path")
 	}
 

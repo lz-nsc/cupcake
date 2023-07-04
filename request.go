@@ -46,6 +46,10 @@ func (r *Request) SetParams(params map[string]string) {
 func (r *Request) SetWild(wild string) {
 	r.wild = wild
 }
+
+func (r Request) Params() map[string]string {
+	return r.params
+}
 func (r Request) Param(key string) string {
 	return r.params[key]
 }

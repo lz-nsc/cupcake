@@ -1,6 +1,7 @@
 package cupcake
 
 import (
+	"html/template"
 	"net/http"
 )
 
@@ -11,6 +12,7 @@ type Cupcake struct {
 	*RouteGroup
 	router *router
 	groups []*RouteGroup
+	render *template.Template // for html render
 }
 
 // Construct a new cupcake server
@@ -36,9 +38,13 @@ func (cc *Cupcake) Run(params ...string) {
 }
 
 func (cc *Cupcake) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	cc.handle(NewResponse(w), NewRequest(r))
+	cc.handle(NewResponse(w, cc.render), NewRequest(r))
 }
 
 func (cc *Cupcake) run(address string) {
 	http.ListenAndServe(address, cc)
+}
+
+func (cc *Cupcake) LoadTemplates(path string) {
+	cc.render = template.Must(template.New("").ParseGlob(path))
 }

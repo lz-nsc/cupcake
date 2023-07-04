@@ -3,17 +3,20 @@ package cupcake
 import (
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"net/http"
 )
 
 type Response struct {
 	writer     http.ResponseWriter
 	statusCode int
+	render     *template.Template
 }
 
-func NewResponse(w http.ResponseWriter) *Response {
+func NewResponse(w http.ResponseWriter, render *template.Template) *Response {
 	return &Response{
 		writer: w,
+		render: render,
 	}
 }
 
@@ -64,6 +67,19 @@ func (resp *Response) HTML(code int, html string) {
 		[]byte(html),
 	)
 }
+
+func (resp *Response) Render(code int, tmplName string, data interface{}) {
+	resp.SetHeader(
+		"Content-Type", "text/html",
+	).Status(
+		code,
+	)
+
+	if err := resp.render.ExecuteTemplate(resp.writer, tmplName, data); err != nil {
+		resp.Error(http.StatusInternalServerError, err.Error())
+	}
+}
+
 func (resp *Response) write(content []byte) {
 	resp.writer.Write(content)
 }
