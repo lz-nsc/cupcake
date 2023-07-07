@@ -5,17 +5,22 @@ import (
 	"strings"
 
 	"github.com/lz-nsc/cupcake/orm/log"
+	"github.com/lz-nsc/cupcake/orm/schema"
+	"github.com/lz-nsc/cupcake/orm/translator"
 )
 
 type Session struct {
 	db      *sql.DB
 	sql     strings.Builder
 	sqlVars []interface{}
+	trans   translator.Translator
+	schema  *schema.Schema
 }
 
-func New(db *sql.DB) *Session {
+func New(db *sql.DB, trans translator.Translator) *Session {
 	return &Session{
-		db: db,
+		db:    db,
+		trans: trans,
 	}
 }
 
