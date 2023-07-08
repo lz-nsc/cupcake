@@ -32,7 +32,7 @@ func (s Session) CreateTable() error {
 		return fmt.Errorf("create table with empty schema")
 	}
 	var fields []string
-	for _, field := range schema.Fields {
+	for _, field := range schema.FieldMap {
 		fields = append(fields, fmt.Sprintf("%s %s %s", field.Name, field.Type, field.Tag))
 	}
 	desc := strings.Join(fields, ",")

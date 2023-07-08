@@ -10,17 +10,21 @@ import (
 type LogLevel int
 
 const (
-	INFO LogLevel = iota
+	DEBUG LogLevel = iota
+	INFO
 	ERROR
 	DISABLE
 )
 
 var (
-	errLog  = log.New(os.Stdout, "\033[31m[ERROR]\033[0m ", log.LstdFlags|log.Lshortfile)
-	infoLog = log.New(os.Stdout, "\033[34m[INFO]\033[0m ", log.LstdFlags|log.Lshortfile)
-	loggers = []*log.Logger{errLog, infoLog}
-	mu      sync.Mutex
+	errLog   = log.New(os.Stdout, "\033[31m[ERROR]\033[0m ", log.LstdFlags|log.Lshortfile)
+	infoLog  = log.New(os.Stdout, "\033[34m[INFO]\033[0m ", log.LstdFlags|log.Lshortfile)
+	debugLog = log.New(os.Stdout, "\033[36m[INFO]\033[0m ", log.LstdFlags|log.Lshortfile)
+	loggers  = []*log.Logger{errLog, infoLog}
+	mu       sync.Mutex
 
+	Debug  = debugLog.Println
+	Debugf = debugLog.Printf
 	Error  = errLog.Println
 	Errorf = errLog.Printf
 	Info   = infoLog.Println
@@ -34,7 +38,9 @@ func SetLevel(lv LogLevel) {
 	for _, logger := range loggers {
 		logger.SetOutput(os.Stdout)
 	}
-
+	if DEBUG < lv {
+		debugLog.SetOutput(ioutil.Discard)
+	}
 	if INFO < lv {
 		infoLog.SetOutput(ioutil.Discard)
 	}
