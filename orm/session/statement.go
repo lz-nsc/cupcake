@@ -5,12 +5,15 @@ import "strings"
 type Type int
 
 const (
-	INSERT Type = iota
+	SELECT Type = iota
+	INSERT
 	VALUES
-	SELECT
+	UPDATE
+	DELETE
 	LIMIT
 	WHERE
 	ORDERBY
+	COUNT
 )
 
 // Statement is used to construct a complete SQL statement with
