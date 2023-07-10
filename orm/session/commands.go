@@ -17,6 +17,7 @@ func (s *Session) Insert(instances ...interface{}) (int64, error) {
 	var modelName string
 	values := make([]interface{}, 0)
 	for _, instance := range instances {
+		s.TriggerHook(BeforeInsert, instance)
 		err := s.Model(instance)
 		if err != nil {
 			return 0, err
@@ -31,7 +32,6 @@ func (s *Session) Insert(instances ...interface{}) (int64, error) {
 		}
 
 		values = append(values, schema.GetValues(instance))
-
 	}
 	if schema := s.Schema(); schema != nil {
 		s.statement.Set(INSERT, schema.Name, schema.FieldNames)
@@ -43,7 +43,7 @@ func (s *Session) Insert(instances ...interface{}) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-
+	s.TriggerHook(AfterInsert, nil)
 	return result.RowsAffected()
 }
 
@@ -57,6 +57,8 @@ func (s *Session) List(arr interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	s.TriggerHook(BeforeQuery, nil)
 	schema := s.Schema()
 	s.statement.Set(SELECT, schema.Name, schema.FieldNames)
 
@@ -79,7 +81,7 @@ func (s *Session) List(arr interface{}) error {
 		if err := rows.Scan(values...); err != nil {
 			return err
 		}
-
+		s.TriggerHook(AfterQuery, nil)
 		list.Set(reflect.Append(list, elem))
 	}
 	return nil
@@ -91,6 +93,8 @@ func (s *Session) Update(data ...interface{}) (int64, error) {
 	if s.Schema() == nil {
 		return 0, errors.New("empty schema")
 	}
+	s.TriggerHook(BeforeUpdate, nil)
+
 	// If first parameter is map, then use this map
 	values, ok := data[0].(map[string]interface{})
 	if !ok {
@@ -112,6 +116,7 @@ func (s *Session) Update(data ...interface{}) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+	s.TriggerHook(AfterUpdate, nil)
 	return result.RowsAffected()
 }
 
@@ -119,6 +124,8 @@ func (s *Session) Delete() (int64, error) {
 	if s.Schema() == nil {
 		return 0, errors.New("empty schema")
 	}
+	s.TriggerHook(BeforeDelete, nil)
+
 	s.statement.Set(DELETE, s.Schema().Name)
 
 	// Build the complete statement
@@ -128,6 +135,7 @@ func (s *Session) Delete() (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+	s.TriggerHook(AfterDelete, nil)
 	return result.RowsAffected()
 }
 
