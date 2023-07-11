@@ -47,7 +47,7 @@ func main() {
 
 	// List
 	users := &Users{}
-	err = session.List(users)
+	err = session.FindAll(users)
 	if err != nil {
 		fmt.Printf("failed to list records, err: %s\n", err.Error())
 		return
@@ -55,7 +55,7 @@ func main() {
 
 	// First and OrderBy
 	user := &User{}
-	err = session.OrderBy("age desc").First(user)
+	err = session.OrderBy("age desc").FindOne(user)
 	if err != nil {
 		fmt.Printf("failed to get first record, err: %s\n", err.Error())
 		return

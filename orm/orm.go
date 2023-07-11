@@ -13,6 +13,7 @@ type ORMEngine struct {
 	db    *sql.DB
 	trans translator.Translator
 }
+type TransactionFunc func(*session.Session) (interface{}, error)
 
 func NewORMEngine(driver string, source string) (engine *ORMEngine, err error) {
 	trans, ok := translator.GetTranslator(driver)
@@ -50,4 +51,31 @@ func (oe *ORMEngine) Close() {
 
 func (oe *ORMEngine) NewSession() *session.Session {
 	return session.New(oe.db, oe.trans)
+}
+
+func (oe *ORMEngine) Transaction(fn TransactionFunc) (result interface{}, err error) {
+	// Create new session for transaction
+	s := oe.NewSession()
+	err = s.Begin()
+	if err != nil {
+		log.Errorf("failed to begin transaction, err: %v", err)
+		return
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = s.Rollback()
+			panic(p)
+		} else if err != nil {
+			_ = s.Rollback()
+		} else {
+			// Rollback of commit fails
+			defer func() {
+				if err != nil {
+					_ = s.Rollback()
+				}
+			}()
+			err = s.Commit()
+		}
+	}()
+	return fn(s)
 }

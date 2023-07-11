@@ -48,7 +48,7 @@ func (s *Session) Insert(instances ...interface{}) (int64, error) {
 }
 
 // List accept array of struct as parameter and return all the record of related table
-func (s *Session) List(arr interface{}) error {
+func (s *Session) FindAll(arr interface{}) error {
 	list := reflect.Indirect(reflect.ValueOf(arr))
 	elemType := list.Type().Elem()
 
@@ -174,11 +174,11 @@ func (s *Session) OrderBy(order string) *Session {
 	return s
 }
 
-func (s *Session) First(instance interface{}) error {
+func (s *Session) FindOne(instance interface{}) error {
 	elem := reflect.Indirect(reflect.ValueOf(instance))
 	elemArr := reflect.New(reflect.SliceOf(elem.Type())).Elem()
 
-	if err := s.Limit(1).List(elemArr.Addr().Interface()); err != nil {
+	if err := s.Limit(1).FindAll(elemArr.Addr().Interface()); err != nil {
 		return err
 	}
 

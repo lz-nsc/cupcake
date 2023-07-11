@@ -2,6 +2,7 @@ package session
 
 import (
 	"database/sql"
+	"errors"
 	"strings"
 
 	"github.com/lz-nsc/cupcake/orm/log"
@@ -9,8 +10,17 @@ import (
 	"github.com/lz-nsc/cupcake/orm/translator"
 )
 
+type DB interface {
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	Exec(query string, args ...interface{}) (sql.Result, error)
+}
+
+var _ DB = (*sql.DB)(nil)
+var _ DB = (*sql.Tx)(nil)
+
 type Session struct {
-	db        *sql.DB
+	db        DB
 	sql       strings.Builder
 	sqlVars   []interface{}
 	trans     translator.Translator
@@ -32,7 +42,7 @@ func (s *Session) Clear() {
 	s.statement = &statement{}
 }
 
-func (s Session) DB() *sql.DB {
+func (s Session) DB() DB {
 	return s.db
 }
 
@@ -66,5 +76,56 @@ func (s *Session) QueryRows() (rows *sql.Rows, err error) {
 	if rows, err = s.DB().Query(s.sql.String(), s.sqlVars...); err != nil {
 		log.Error(err)
 	}
+	return
+}
+
+func (s *Session) Begin() (err error) {
+	log.Debug("begin transaction")
+	db, ok := s.DB().(*sql.DB)
+	if !ok {
+		err = errors.New("transaction has alread begun")
+		log.Error(err)
+		return
+	}
+	s.db, err = db.Begin()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	log.Debug("begin transaction succeed")
+	return
+}
+
+func (s *Session) Commit() (err error) {
+	log.Debug("commit transaction")
+	tx, ok := s.DB().(*sql.Tx)
+	if !ok {
+		err = errors.New("need to begin transaction first")
+		log.Error(err)
+		return
+	}
+	err = tx.Commit()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	log.Debug("commit transaction succeed")
+	return
+}
+
+func (s *Session) Rollback() (err error) {
+	log.Debug("rollback transaction")
+	tx, ok := s.DB().(*sql.Tx)
+	if !ok {
+		err = errors.New("need to begin transaction first")
+		log.Error(err)
+		return
+	}
+	err = tx.Rollback()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	log.Debug("rollback transaction succeed")
 	return
 }
