@@ -2,24 +2,45 @@ package cupcake
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 )
 
 type Request struct {
-	req    *http.Request
-	path   string
-	method string
-	params map[string]string
-	wild   string
+	req      *http.Request
+	path     string
+	method   string
+	params   map[string]string
+	data     map[string]string
+	fullData map[string]string
+	wild     string
 }
 
 func NewRequest(r *http.Request) *Request {
-	return &Request{
-		req:    r,
-		path:   r.URL.Path,
-		method: r.Method,
-		params: make(map[string]string),
+	r.ParseForm()
+	req := &Request{
+		req:      r,
+		path:     r.URL.Path,
+		method:   r.Method,
+		params:   make(map[string]string),
+		data:     make(map[string]string),
+		fullData: make(map[string]string),
 	}
+	for key, value := range r.PostForm {
+		if len(value) == 0 {
+			req.data[key] = ""
+		} else {
+			req.data[key] = value[0]
+		}
+	}
+	for key, value := range r.Form {
+		if len(value) == 0 {
+			req.fullData[key] = ""
+		} else {
+			req.fullData[key] = value[0]
+		}
+	}
+	return req
 }
 func (r *Request) PostForm(key string) string {
 	return r.req.FormValue(key)
@@ -56,4 +77,12 @@ func (r Request) Param(key string) string {
 
 func (r Request) Wild() string {
 	return r.wild
+}
+
+func (r Request) Body() io.ReadCloser {
+	return r.req.Body
+}
+
+func (r Request) Data() map[string]string {
+	return r.data
 }

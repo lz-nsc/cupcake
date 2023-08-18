@@ -16,7 +16,7 @@ type User struct {
 type Users []User
 
 func main() {
-	oe, err := orm.NewORMEngine("sqlite3", "gee.db")
+	oe, err := orm.NewORMEngine("sqlite3", "cupcake.db")
 	if err != nil {
 		fmt.Printf("failed to create orm engine, err: %s\n", err.Error())
 		return

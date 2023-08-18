@@ -108,6 +108,18 @@ func (group *RouteGroup) PUT(pattern string, handler HandlerFunc) {
 func (group *RouteGroup) DELETE(pattern string, handler HandlerFunc) {
 	group.addRouter(DELETE, pattern, handler)
 }
+
+func (group *RouteGroup) Route(pattern string, controller Controller) {
+	if pattern[len(pattern)-1] != '/' {
+		pattern += "/"
+	}
+	idPattern := pattern + "{id}"
+	group.addRouter(GET, idPattern, controller.Retrive)
+	group.addRouter(POST, pattern, controller.Create)
+	group.addRouter(PUT, idPattern, controller.Update)
+	group.addRouter(PUT, idPattern, controller.Delete)
+}
+
 func (group *RouteGroup) wrapMiddlewares(handler HandlerFunc) HandlerFunc {
 	for _, middlerWare := range group.middlewares {
 		handler = middlerWare(handler)

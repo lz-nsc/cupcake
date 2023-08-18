@@ -2,12 +2,12 @@ package middlewares
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"runtime"
 	"strings"
 
 	"github.com/lz-nsc/cupcake"
+	"github.com/lz-nsc/cupcake/log"
 )
 
 func trace(message string) string {
@@ -30,7 +30,7 @@ func Recovery(handler cupcake.HandlerFunc) cupcake.HandlerFunc {
 	return cupcake.HandlerFunc(func(resp *cupcake.Response, req *cupcake.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				log.Printf("%s\n\n", trace(fmt.Sprintf("%s", err)))
+				log.Errorf("%s\n\n", trace(fmt.Sprintf("%s", err)))
 				resp.Error(http.StatusInternalServerError, "Internal Server Error")
 			}
 		}()

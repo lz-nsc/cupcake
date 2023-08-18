@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/lz-nsc/cupcake/orm/log"
+	"github.com/lz-nsc/cupcake/log"
 	"github.com/lz-nsc/cupcake/orm/session"
 	"github.com/lz-nsc/cupcake/orm/translator"
 )

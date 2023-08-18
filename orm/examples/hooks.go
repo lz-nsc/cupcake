@@ -22,7 +22,7 @@ func (user *HookUser) BeforeInsert(session *session.Session) error {
 }
 
 func main() {
-	oe, err := orm.NewORMEngine("sqlite3", "gee.db")
+	oe, err := orm.NewORMEngine("sqlite3", "cupcake.db")
 	if err != nil {
 		fmt.Printf("failed to create orm engine, err: %s\n", err.Error())
 		return
@@ -51,7 +51,7 @@ func main() {
 	}
 	fmt.Printf("Successfully insert %d row(s)\n", count)
 	user := &HookUser{}
-	err = session.First(user)
+	err = session.FindOne(user)
 	if err != nil {
 		fmt.Printf("failed to get first record, err: %s\n", err.Error())
 		return

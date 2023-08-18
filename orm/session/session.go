@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/lz-nsc/cupcake/orm/log"
+	"github.com/lz-nsc/cupcake/log"
 	"github.com/lz-nsc/cupcake/orm/schema"
 	"github.com/lz-nsc/cupcake/orm/translator"
 )
@@ -128,4 +128,8 @@ func (s *Session) Rollback() (err error) {
 	}
 	log.Debug("rollback transaction succeed")
 	return
+}
+
+func (s *Session) ModelName() string {
+	return s.schema.Name
 }

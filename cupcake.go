@@ -1,12 +1,18 @@
 package cupcake
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
+
+	"github.com/lz-nsc/cupcake/orm"
+	"github.com/lz-nsc/cupcake/orm/session"
 )
 
 // cupcake request handler
 type HandlerFunc func(*Response, *Request)
+
+var defaultDBEngine *orm.ORMEngine
 
 type Cupcake struct {
 	*RouteGroup
@@ -47,4 +53,15 @@ func (cc *Cupcake) run(address string) {
 
 func (cc *Cupcake) LoadTemplates(path string) {
 	cc.render = template.Must(template.New("").ParseGlob(path))
+}
+
+func newDBSession() *session.Session {
+	if defaultDBEngine == nil {
+		oe, err := orm.NewORMEngine("sqlite3", "cupcake.db")
+		if err != nil {
+			panic(fmt.Sprintf("Failed to create db engine, err: %s", err))
+		}
+		defaultDBEngine = oe
+	}
+	return defaultDBEngine.NewSession()
 }
