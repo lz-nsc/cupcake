@@ -2,6 +2,7 @@ package session
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
 )
 
@@ -187,4 +188,9 @@ func (s *Session) FindOne(instance interface{}) error {
 	}
 	elem.Set(elemArr.Index(0))
 	return nil
+}
+
+func (s *Session) FindOneWithPK(pk interface{}, instance interface{}) error {
+	s.Where(fmt.Sprintf("%s = ?", s.schema.PK), pk)
+	return s.FindOne(instance)
 }

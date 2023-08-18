@@ -19,6 +19,7 @@ type Field struct {
 type Schema struct {
 	Model      interface{}
 	Name       string
+	PK         string
 	FieldNames []string
 	FieldMap   map[string]*Field
 }
@@ -60,10 +61,16 @@ func Parse(record interface{}, trans translator.Translator) (*Schema, error) {
 			}
 			if val, ok := f.Tag.Lookup("cupcakeorm"); ok {
 				field.Tag = val
+				if val == "PRIMARY KEY" {
+					schema.PK = field.Name
+				}
 			}
 			schema.FieldNames = append(schema.FieldNames, field.Name)
 			schema.FieldMap[field.Name] = field
 		}
+	}
+	if schema.PK == "" {
+		schema.PK = "id"
 	}
 	return schema, nil
 }

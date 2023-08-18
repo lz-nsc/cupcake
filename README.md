@@ -50,7 +50,7 @@ Cupcake provides `Controller` that allows users to easily create RESTful APIs.
 The core component of any RESTful API is the resource, and the Cupcake controller simplifies the process of registering the CRUD operations for a resource on the router:
 ```
 type User struct {
-	Name string `json:"user"`
+	Name string `json:"user" cupcakeorm:"PRIMARY KEY"`
 	Age  int    `json:"age"`
 }
 type UserController struct {

@@ -9,18 +9,6 @@ import (
 	"github.com/lz-nsc/cupcake/orm/session"
 )
 
-// As a restful framework, I want this fremework to be more handy
-// like django.
-// What I want is, user can create CRUD at the same time for a resource
-// Like:
-// cc.Route("<path>", BaseController{model:User})
-// type User struct{
-//    *baseController
-//    Name string
-// }
-//
-//func (user *User)
-
 type Controller interface {
 	Create(*Response, *Request)
 	Retrive(*Response, *Request)
@@ -95,8 +83,16 @@ func (base *BaseController) Create(resp *Response, req *Request) {
 	resp.Status(http.StatusCreated)
 }
 
+// Retrive data with givn primary key
 func (base *BaseController) Retrive(resp *Response, req *Request) {
-	resp.Error(http.StatusMethodNotAllowed, "Method Not Allowed")
+	pk := req.Param("pk")
+	instance := reflect.New(reflect.Indirect(reflect.ValueOf(base.Model)).Type()).Interface()
+	err := base.session.FindOneWithPK(pk, instance)
+	if err != nil {
+		resp.Error(http.StatusBadRequest, err.Error())
+		return
+	}
+	resp.JSON(http.StatusOK, instance)
 }
 func (base *BaseController) Update(resp *Response, req *Request) {
 	resp.Error(http.StatusMethodNotAllowed, "Method Not Allowed")

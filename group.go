@@ -113,7 +113,7 @@ func (group *RouteGroup) Route(pattern string, controller Controller) {
 	if pattern[len(pattern)-1] != '/' {
 		pattern += "/"
 	}
-	idPattern := pattern + "{id}"
+	idPattern := pattern + "{pk}"
 	group.addRouter(GET, idPattern, controller.Retrive)
 	group.addRouter(POST, pattern, controller.Create)
 	group.addRouter(PUT, idPattern, controller.Update)
