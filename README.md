@@ -75,3 +75,4 @@ For more examples, please check the Cupcake [examples](https://github.com/lz-nsc
 - [ ] Configuration. Make it convenient for user to set up the project, include choices for orm, db, or middlewares.
 - [X] Controller. Controller should be bound with a resource, and when the countroller is registered to the router, the all the CURD method for this specific resource will be registered.
 - [ ] A command-line tool for creating new RESTful server project with cupcake framework.
+- [ ] Serializer
