@@ -67,6 +67,30 @@ cc.Run(":8080")
 
 In this simple example, we used BaseController, which supports the Created(POST) and Retrieve(GET) methods by default. 
 
+If we run this server, then we can create `User` with:
+
+**POST localhost:8080/users**
+
+```json
+{
+	"user": "Cupcake",
+	"age": 1
+}
+```
+
+and retrive user data with:
+
+**Get localhost:8080/users/Cupcake**
+
+then get response:
+
+```json
+{
+	"user": "Cupcake",
+	"age": 1
+}
+```
+
 Users can customize the behavior of their controller by defining their own controller methods.
 
 For more examples, please check the Cupcake [examples](https://github.com/lz-nsc/cupcake/tree/master/examples)
