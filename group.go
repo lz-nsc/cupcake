@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+
+	"github.com/lz-nsc/cupcake/log"
 )
 
 type RouteGroup struct {
@@ -91,7 +93,8 @@ func (group *RouteGroup) handle(resp *Response, req *Request) {
 		return
 	}
 
-	fmt.Println(req.String())
+	log.Info(req.String())
+	req.readData()
 	handler(resp, req)
 }
 

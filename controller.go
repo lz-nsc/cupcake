@@ -1,7 +1,6 @@
 package cupcake
 
 import (
-	"encoding/json"
 	"net/http"
 	"reflect"
 
@@ -64,11 +63,12 @@ func (base *BaseController) Create(resp *Response, req *Request) {
 	instance := reflect.New(reflect.Indirect(reflect.ValueOf(base.Model)).Type()).Interface()
 
 	// Parse request data
-	err := json.NewDecoder(req.Body()).Decode(instance)
+	// TODO: Currently can only accept JSON, whether I should consider how to parse Postform
+	err := req.Parse(instance)
 
 	if err != nil {
 		log.Errorf("failed to read request body, err: %s\n", err.Error())
-		resp.Error(http.StatusInternalServerError, "Internal Error")
+		resp.Error(http.StatusBadRequest, "Bad Request")
 		return
 	}
 
@@ -99,4 +99,8 @@ func (base *BaseController) Update(resp *Response, req *Request) {
 }
 func (base *BaseController) Delete(resp *Response, req *Request) {
 	resp.Error(http.StatusMethodNotAllowed, "Method Not Allowed")
+}
+
+func (base *BaseController) Parse(req *Request, obj interface{}) {
+	req.Parse(obj)
 }

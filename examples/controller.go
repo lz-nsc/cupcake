@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	Name string `json:"user" cupcakeorm:"PRIMARY KEY"`
+	Name string `json:"name" cupcakeorm:"PRIMARY KEY"`
 	Age  int    `json:"age"`
 }
 type UserController struct {
